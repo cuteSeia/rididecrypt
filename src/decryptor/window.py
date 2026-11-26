@@ -29,7 +29,6 @@ STYLE = """
 QMainWindow, QWidget#root { background-color: #181818; color: #eeeeee; }
 QLabel { color: #dddddd; }
 QLabel#title { font-size: 25px; font-weight: 700; color: #f5f5f5; }
-QLabel#subtitle { font-size: 13px; color: #a5a5a5; }
 QLabel#section { font-size: 12px; font-weight: 650; color: #c2c2c2; }
 QLabel#status { font-size: 12px; color: #c6c6c6; }
 QLabel#elapsed { font-size: 12px; font-weight: 600; color: #e2e2e2; }
@@ -164,7 +163,6 @@ class MainWindow(QMainWindow):
         layout.setSpacing(12)
 
         layout.addWidget(self._label("리디 라이브러리", "title"))
-        layout.addWidget(self._label("복호화한 책을 EPUB과 PDF로 시리즈별 저장합니다.", "subtitle"))
 
         card = QFrame()
         card.setObjectName("card")
@@ -224,7 +222,7 @@ class MainWindow(QMainWindow):
         self.progress.setTextVisible(False)
         progress_layout.addWidget(self.progress)
         progress_info = QHBoxLayout()
-        self.status = self._label("User Index를 입력하면 책 목록이 나옵니다.", "status")
+        self.status = self._label("준비됨", "status")
         progress_info.addWidget(self.status, 1)
         self.elapsed_label = self._label("소요 시간  00:00", "elapsed")
         progress_info.addWidget(self.elapsed_label, 0, Qt.AlignRight)
@@ -320,7 +318,7 @@ class MainWindow(QMainWindow):
         self.books.clear()
         if not user_idx:
             self.count_label.setText("책 목록")
-            self.status.setText("User Index를 입력하면 책 목록이 나옵니다.")
+            self.status.setText("User Index 입력")
             return
         try:
             rows = list_books(user_idx)
@@ -332,7 +330,7 @@ class MainWindow(QMainWindow):
             self.books.addItem(title)
             self.books.item(self.books.count() - 1).setData(Qt.UserRole, book_id)
         self.count_label.setText(f"책 목록  {len(rows)}권")
-        self.status.setText("EPUB과 PDF를 시리즈별 폴더에 저장합니다.")
+        self.status.setText("준비됨")
 
     def start(self) -> None:
         if self.job is not None:
