@@ -1,0 +1,24 @@
+[project]
+name = "decryptor"
+version = "0.1.0"
+description = "Decrypt a Ridibooks library into title-named folders"
+readme = "README.md"
+authors = [
+    { name = "cuteSeia", email = "puppl7272@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "cryptography>=46",
+    "img2pdf>=0.6",
+    "pyside6>=6.12.0",
+]
+
+[dependency-groups]
+build = ["pyinstaller>=6.13"]
+
+[project.scripts]
+decryptor = "decryptor:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
