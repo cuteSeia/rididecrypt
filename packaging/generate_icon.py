@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-import os
 import subprocess
 from pathlib import Path
 
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication, QImage, QPainter
-from PySide6.QtSvg import QSvgRenderer
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -17,19 +12,7 @@ ICONSET = ROOT / "build" / "RidiDecryptor.iconset"
 
 
 def main() -> None:
-    app = QGuiApplication([])
-    svg = (ASSETS / "rididecryptor.svg").read_bytes()
-    renderer = QSvgRenderer(svg)
-    if not renderer.isValid():
-        raise RuntimeError("아이콘 SVG를 읽을 수 없습니다")
-
-    image = QImage(1024, 1024, QImage.Format.Format_ARGB32_Premultiplied)
-    image.fill(Qt.GlobalColor.transparent)
-    painter = QPainter(image)
-    renderer.render(painter)
-    painter.end()
-    if not image.save(str(ASSETS / "rididecryptor.png")):
-        raise RuntimeError("아이콘 PNG를 저장할 수 없습니다")
+    image = Image.open(ASSETS / "rididecryptor.png").convert("RGBA")
 
     ICONSET.mkdir(parents=True, exist_ok=True)
     variants = (
@@ -45,16 +28,12 @@ def main() -> None:
         ("icon_512x512@2x.png", 1024),
     )
     for filename, size in variants:
-        scaled = image.scaled(size, size, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        if not scaled.save(str(ICONSET / filename)):
-            raise RuntimeError(f"아이콘 크기 생성 실패: {filename}")
+        scaled = image.resize((size, size), Image.Resampling.LANCZOS)
+        scaled.save(ICONSET / filename, format="PNG")
 
     subprocess.run(
         ["iconutil", "-c", "icns", str(ICONSET), "-o", str(ASSETS / "RidiDecryptor.icns")],
         check=True,
     )
-    app.quit()
-
-
 if __name__ == "__main__":
     main()

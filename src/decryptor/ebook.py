@@ -10,8 +10,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Optional
 
-from PySide6.QtGui import QImage
-
 from .core import IMAGE_SUFFIXES
 
 Progress = Optional[Callable[[int, int], None]]
@@ -44,18 +42,17 @@ def _epub_image(path: Path) -> tuple[str, bytes]:
         }[suffix]
         return media_type, path.read_bytes()
 
-    image = QImage(str(path))
-    if image.isNull():
-        raise ValueError(f"이미지를 열 수 없습니다: {path.name}")
-    from PySide6.QtCore import QBuffer, QByteArray, QIODevice
+    from io import BytesIO
 
-    data = QByteArray()
-    buffer = QBuffer(data)
-    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
-    if not image.save(buffer, "PNG"):
-        raise ValueError(f"EPUB 이미지 변환 실패: {path.name}")
-    buffer.close()
-    return "image/png", bytes(data)
+    from PIL import Image
+
+    try:
+        with Image.open(path) as source:
+            output = BytesIO()
+            source.save(output, format="PNG")
+            return "image/png", output.getvalue()
+    except Exception as exc:
+        raise ValueError(f"EPUB 이미지 변환 실패: {path.name}: {exc}") from exc
 
 
 def create_epub(folder: Path, destination: Path, progress: Progress = None) -> int:
